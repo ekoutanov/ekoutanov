@@ -12,20 +12,22 @@ import (
 )
 
 func main() {
-	const threads = 100
+	const threads = 16
 	const messages = 1
-	const logging = false
-	const sleepBetweenCycles = 30 * time.Millisecond
+	const extraLogging = false
+	const sleepBetweenCycles = 50 * time.Millisecond
 	var topic = "kafkaload"
 
-	for {
+	for runNo := 0; true; runNo++ {
+		log.Printf("Starting run %d", runNo)
+
 		// Creates several producers, publishes a single message, then shuts them down.
 		wg := sync.WaitGroup{}
 		wg.Add(threads)
 		for i := 0; i < threads; i++ {
 			i := i
 			go func() {
-				if logging {
+				if extraLogging {
 					log.Printf("Created producer [%d]", i)
 				}
 				prod, err := kafka.NewProducer(&kafka.ConfigMap{
@@ -33,7 +35,7 @@ func main() {
 					"enable.idempotence":  true,
 					"delivery.timeout.ms": 10000,
 					"socket.timeout.ms":   1000,
-					// "debug": "all",
+					"debug":               "all",
 				})
 				if err != nil {
 					panic(err)
@@ -49,7 +51,7 @@ func main() {
 					}
 				}()
 
-				if logging {
+				if extraLogging {
 					log.Printf("Published [%d]", i)
 				}
 				for m := 0; m < messages; m++ {
@@ -83,7 +85,7 @@ func main() {
 		timer.Stop()
 		close(done)
 
-		if logging {
+		if extraLogging {
 			log.Printf("Done")
 		}
 		time.Sleep(sleepBetweenCycles)
