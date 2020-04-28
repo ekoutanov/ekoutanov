@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	const threads = 100
+	const threads = 16
 	const messages = 1
 	const logging = false
 	const sleepBetweenCycles = 30 * time.Millisecond
